@@ -1,0 +1,275 @@
+print("""\
+# *************************************************************************** #
+# *************************************************************************** #
+# TP9 : FACTORISATION DES ENTIERS                                             #
+# *************************************************************************** #
+# *************************************************************************** #
+""")
+
+#TRABET Clément
+#
+# CONSIGNES
+#
+# Les seules lignes a modifier sont annoncee par "Code pour l'exercice"
+# indique en commmentaire et son signalees
+# Ne changez pas le nom des variables
+#
+# CONSEILS
+#
+# Ce modele vous sert a restituer votre travail. Il est deconseille d'ecrire
+# une longue suite d'instruction et de debugger ensuite. Il vaut mieux tester
+# le code que vous produisez ligne apres ligne, afficher les resultats et
+# controler que les objets que vous definissez sont bien ceux que vous attendez.
+#
+# Vous devez verifier votre code en le testant, y compris par des exemples que
+# vous aurez fabrique vous-meme.
+#
+
+
+reset()
+print("""\
+# ****************************************************************************
+# DIVISEURS SUCCESSIFS 348 Done 
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+n=2*3*3*5*5*5*7*11*11
+
+# Code pour l'EXERCICE
+
+def div_successives(n):
+    liste_diviseurs=[]
+    d=2
+    while d*d<=n:
+        while n%d==0:
+            liste_diviseurs.append(d)
+            n=n//d 
+        d=d+1
+    if n!=1:
+        liste_diviseurs.append(n)
+    return  list(set(liste_diviseurs))
+
+# # Affichage des resultats
+
+div_successives(n)
+
+for n in range(2,10):
+    assert(div_successives(ZZ(n))==ZZ(n).prime_divisors())
+
+print("Question 2 :")
+print("la proportion de nombre premier est assez faible donc beaucoup d'itérations seront inutiles. Il serait plus efficace de tester uniquement les d premiers")
+
+print("Question 3 :")
+print(("Pour chaque pk soit il fait parti du produit soit il n'en fait pas parti donc on test 2^k diviseurs"))
+reset()
+
+
+
+
+print("""\
+# ****************************************************************************
+# FACTORISATION D'UN NOMBRE B-FRIABLE DONE
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+n=2*3*3*5*5*5*7*11*11
+P=[p for p in primes(12)]
+
+# Code pour l'EXERCICE
+
+def div_successives_friable(n, P):
+    liste_diviseurs=[]
+    for p in P:
+        while n%p==0:
+            liste_diviseurs.append(p)
+            n=n//p
+    return  list(set(liste_diviseurs))
+
+# # Affichage des resultats 
+
+div_successives_friable(n,P)
+
+b=True
+print("Test factorisation d'un nombre B-friable")
+
+for n in range(2,10):
+    b=b & (div_successives_friable(ZZ(n),P)==ZZ(n).prime_divisors())
+
+print("Test réussi :" +str(b))
+
+
+reset()
+print("""\
+# ****************************************************************************
+# RHO DE POLLARD DONE
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+n=222763
+
+# Code pour l'EXERCICE
+
+
+def myPollardrho(n):
+    x0=Integers(n).random_element()
+    x = x0
+    y = x0
+    g = gcd(x - y, n)
+    while g <= 1 :
+        x = x^2 + 1
+        y = (y^2 + 1)^2 + 1
+        g = gcd(x - y, n)
+        if g == 0 :
+            g = n
+    if g == n :
+        return False        
+    return True
+
+# # Affichage des resultats
+
+myPollardrho(n)
+
+for _ in range(5):
+    n=ZZ.random_element(3,100)
+    print(n, 
+      "| Resultat rho de Pollard : ", 
+      myPollardrho(n), 
+      " | n est-il composé ?",not n.is_prime())
+
+
+
+
+reset()
+print("""\
+# ****************************************************************************
+# P-1 DE POLLARD 358 DONE
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+n=1323269
+
+# Code pour l'EXERCICE
+
+
+def myPollardpm1(n, b):
+    a = ZZ.random_element(2, n)
+    g = gcd(a,n)
+    if g != 1 :
+        return True
+    for p in primes(b) :
+        alpha_p = 1
+        while p^alpha_p <= b :
+            alpha_p += 1
+        alpha_p -=1
+        for j in range(alpha_p) :
+            a = a^p % n
+    g = gcd(a-1,n)
+    if 1 < g and g < n :
+        return True
+    return False
+
+
+
+# # Affichage des resultats
+
+print(myPollardpm1(n, 50))
+
+for _ in range(5):
+    n=ZZ.random_element(3,100)
+    print(n, 
+      "| Resultat rho de Pollard : ", 
+      myPollardpm1(n, 50), 
+      " | n est-il composé ?",not n.is_prime())
+
+
+
+
+reset()
+print("""\
+# ****************************************************************************
+# CRIBLE QUADRATIQUE 379
+# ****************************************************************************
+""")
+
+# Donnees de l'enonce de l'exercice
+
+n=2886
+
+# Code pour l'EXERCICE
+
+def div_successives_friable(n, P):
+    i = 0
+    F = []
+    for p in P :
+        v = 0
+        while n % p == 0 :
+            n /= p
+            v += 1
+        F.append((p, v))
+    return (F, n)
+
+
+def cribleQuadratique(n) :
+    B = ceil( ( e^( (ln(n)*ln(ln(n)))^(1/2) )  )^(1/2)  )
+    P = [p for p in primes(B)]
+    m = len(P)
+    S = []
+    
+    x = ceil(n^(1/2))
+    d = 0
+    while d <= m :
+        a = x^2 % n
+        F, r = div_successives_friable(a, P)
+        if r == 1 :
+            S.append((x, a, F))
+            d += 1
+        x += 1
+    
+    M = [[0 for _ in range(m+1)] for _ in range(m)]
+    for i in range(m) :
+        for j in range(m+1) :
+            M[i][j] = S[j][2][i][1] % 2
+    M = matrix(GF(2), M)
+    
+    for vec in kernel(M.transpose()).basis() :
+        j = 0
+        z = 1
+        v = [0] * m
+        while j < len(vec) :
+            if vec[j] != 0 :
+                z *= S[j][0]
+                for i in range(m) :
+                    v[i] += S[j][2][i][1]
+            j+=1
+        y = 1
+        for i in range(m) :
+            v[i] /= 2
+            y *= P[i]^(v[i])
+            
+        d = gcd(z-y,n)
+        if d != 1 and d != n :
+            return d
+    
+    return 0
+
+
+# # Affichage des resultats
+p=cribleQuadratique (n)
+print("test du crible quadratique")
+print(str(p))
+print("test p divise n : " +str(n%p==0))
+
+
+

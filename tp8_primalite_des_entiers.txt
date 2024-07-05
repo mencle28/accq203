@@ -1,0 +1,364 @@
+print("""\
+# *************************************************************************** #
+# *************************************************************************** #
+# TP8 : PRIMALITE DES ENTIERS                                                 #
+# *************************************************************************** #
+# *************************************************************************** #
+""")
+
+# CONSIGNES
+#
+# Les seules lignes a modifier sont annoncee par "Code pour l'exercice"
+# indique en commmentaire et son signalees
+# Ne changez pas le nom des variables
+#
+# CONSEILS
+#
+# Ce modele vous sert a restituer votre travail. Il est deconseille d'ecrire
+# une longue suite d'instruction et de debugger ensuite. Il vaut mieux tester
+# le code que vous produisez ligne apres ligne, afficher les resultats et
+# controler que les objets que vous definissez sont bien ceux que vous attendez.
+#
+# Vous devez verifier votre code en le testant, y compris par des exemples que
+# vous aurez fabrique vous-meme.
+#
+
+
+print("""\
+# ****************************************************************************
+# TEST DE RABIN-MILLER 
+# ****************************************************************************
+""")
+
+
+n = 561
+
+# Code pour l'EXERCICE
+
+def testRM(n):
+    if n == 1 or n == 0 :
+        return False
+    if n == 2 :
+        return True
+    a = ZZ.random_element(2, n)
+    tmp = n-1
+    v = 0
+    while tmp %2 == 0 :
+        v+=1
+        tmp = tmp//2
+    m = tmp
+    
+    if gcd(a,n) != 1 :
+        return False
+    
+    b=a^m%n
+    if b == 1 :
+        return True
+    
+    for i in range(1,v+1) :
+        if b^2 % n == 1 :
+            g = gcd(b+1,n)
+            if g == 1 or g == n :
+                return True
+            else :
+                return False
+        b = b^2 %n
+    return False
+
+# # Affichage des resultats
+
+print("Test primalite de n=",n,"avec implementation de Rabin-Miller")
+print(testRM(n))
+
+print("""\
+# ****************************************************************************
+#  PERFORMANCES DE RABIN-MILLER
+# ****************************************************************************
+""")
+
+# Donnees de l'enonce de l'exercice
+
+nmin=10
+nmax=500
+nbtests = 25
+
+# Code pour l'EXERCICE
+
+rep2 = "On a des problèmes quand le nombre de facteurs est faible"
+rep3 = "On augmente le nombre de tests"
+
+
+def multipleTestRM(n, nbtests) :
+    for _ in range(nbtests) :
+        if not testRM(n) :
+            return False
+    return True
+
+
+# # Affichage des resultats
+
+
+bar_chart( [sum( [testRM(n) for i in range(nbtests)]) for n in range(nmin,nmax)])
+print(rep2)
+print(rep3)
+list_plot( [timeit( 'testRM(n)', number=20, repeat=3, seconds=true) for n in range(1001,1001+100000,100) ])
+
+
+print("""\
+# ****************************************************************************
+# TEST DE SOLOVAY-STRASSEN 
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+n = 561
+nbtests = 20
+nmin = 10
+nmax = 501
+
+# Code pour l'EXERCICE
+
+def testSOS(n):
+    if n == 1 or n == 0 :
+        return False
+    if n == 2 :
+        return True
+    
+    n = ZZ(n)
+    if n%2 == 0 :
+        return False
+    a = ZZ.random_element(2,n)
+    if gcd(a,n) != 1 :
+        return False
+    if jacobi_symbol(a,n) < 0 :
+        jcs = n-1
+    else :
+        jcs = 1
+    if jcs == a^((n-1)/2) %n :
+        return True
+    else :
+        return False
+
+rep3 = "Idem, moins il y a de facteurs premiers moins on détecte qu'il se décompose"
+rep4 = "On augmente ici encore le nombre de tests"
+
+chart_half = [sum( [testSOS(n) for i in range(nbtests)])%nbtests for n in range(nmin,nmax)]
+b = bar_chart(chart_half)
+b.axes_labels((" ", "Single test"))
+show(b)
+
+def mulipleTestSOS(n, nbtest) :
+    for _ in range(nbtests) :
+        if not testSOS(n) :
+            return False
+    return True
+
+chart_minus_fifty = [sum( [mulipleTestSOS(n, 50) for i in range(nbtests)])%nbtests for n in range(nmin,nmax)]
+b = bar_chart(chart_minus_fifty)
+b.axes_labels((" ", "Mutiple tests (50)"))
+show(b)
+    
+
+# # Affichage des resultats
+
+print("Test de la primalite de n=",n,"avec implementation de Solovay-Strassen")
+print(testSOS(n))
+print(rep3)
+print(rep4)
+
+
+print("""\
+# ****************************************************************************
+# COMPARAISON ENTRE LES TESTS DE R-M ET S-S 
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+nmax=150
+
+# Code pour l'EXERCICE
+def testSOS_rdInput(n, a):
+    if n == 1 or n == 0 :
+        return False
+    if n == 2 :
+        return True
+    n = ZZ(n)
+    if n%2 == 0 :
+        return False
+    if gcd(a,n) != 1 :
+        return False
+    if jacobi_symbol(a,n) < 0 :
+        jcs = n-1
+    else :
+        jcs = 1
+    if jcs == a^((n-1)/2) %n :
+        return True
+    else :
+        return False
+    
+def testRM_rdInput(n, a):
+    if n == 1 or n == 0 :
+        return False
+    if n == 2 :
+        return True
+    tmp = n-1
+    v = 0
+    while tmp %2 == 0 :
+        v+=1
+        tmp = tmp//2
+    m = tmp
+    
+    if gcd(a,n) != 1 :
+        return False
+    
+    b=a^m%n
+    if b == 1 :
+        return True
+    
+    for i in range(1,v+1) :
+        if b^2 % n == 1 :
+            g = gcd(b+1,n)
+            if g == 1 or g == n :
+                return True
+            else :
+                return False
+        b = b^2 %n
+    return False
+
+Temoins = []
+
+for n in range(nmax+1) :
+    for a in range(2, n) :
+        if not testRM_rdInput(n,a) and testSOS_rdInput(n,a) :
+            Temoins.append((n,a))
+
+# # Affichage des resultats
+
+print("Liste d'entiers composés et de temoins exclusifs de Rabin-Miller")
+print(Temoins)
+
+
+
+print("""\
+# ****************************************************************************
+# TEST DE LUCAS
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+
+# Code pour l'EXERCICE
+def v(m, p, q) :
+    if m == 0 :
+        return 2
+    if m == 1 :
+        return p    
+    if m%2 == 0 :
+        return v(m//2, p, q)^2 - 2*q^(m//2)
+    else :
+        return v((m-1)//2+1, p, q) * v((m-1)//2, p, q) - p*q^((m-1)//2)
+
+def u(m, p, q) :
+    if m == 0 or m == 1 :
+        return m
+    if m%2 == 0 :
+        return u(m//2, p, q) * v(m//2, p, q)
+    else :
+        return u((m-1)//2+1, p, q) * v((m-1)//2, p, q) - q^((m-1)//2)
+
+def testL(n, p=None, q=None):
+    if n == 0 or n == 1 :
+        return False
+    if n == 2 :
+        return True
+    
+    if p == None :
+        p = 0
+    if q == None :
+        q = 0
+    delta = p^2 - 4*q
+    g = gcd(n, 2*q*delta)
+    if 1 < g and g < n :
+         return False
+    
+    while delta == 0 or g == n :
+        p = ZZ.random_element(10000)
+        q = ZZ.random_element(10000)
+        delta = p^2 - 4*q
+        g = gcd(n, 2*q*delta)
+        if 1 < g and g < n :
+            return False
+#         else :
+#             if g == n :
+#                 return "Error"
+    
+    m = n - jacobi_symbol(delta, n)
+    t = 0
+    while m%2 == 0 :
+        m/=2
+        t+=1
+    
+    g = gcd(n, u(m, p, q))
+    if 1 < g and g < n :
+        return False
+    else :
+        if g == n :
+            return True
+    
+    for s in range(t) :
+        g = gcd(n, v(2^s * m, p, q))
+        if 1 < g and g < n :
+            return False
+        else :
+            if g == n :
+                return True
+    return False
+    
+# # Affichage des resultats
+
+for i in range(20):
+    print(testL(i) == ZZ(i).is_prime())
+
+
+
+print("""\
+# ****************************************************************************
+# TEST DE BAILLIE, POMERANCE, SELFRIDGE ET WAGSTAFF
+# ****************************************************************************
+""")
+
+
+# Donnees de l'enonce de l'exercice
+
+nmax=1000
+
+# Code pour l'EXERCICE
+
+def testBPSW(n):
+    if n == 1 or n == 0 :
+        return False
+    if n == 2 :
+        return True
+    if not testRM_rdInput(n, 2) :
+        return False
+    
+    k = 0
+    delta = 5
+    while jacobi_symbol(delta, n) != -1 :
+        k+=1
+        delta = (-1)^k * (2*k+5)
+    
+    p = 1
+    q = (1-delta) / 4
+    return testL(n, p, q)
+        
+
+# # Affichage des resultats
+
+print(all([ZZ(n).is_prime()==testBPSW(n) for n in range(2,nmax+1)]))
